@@ -7,5 +7,9 @@ app = Flask(__name__)
 app.config.from_object(config)
 log = Logger(app.config["LOG_PATH"])
 
+@app.route("/")
+def default():
+    return "Hello World!"
+
 if __name__ == "__main__":
-    print("Hello World!")
+    app.run(debug=True, port=8000)
