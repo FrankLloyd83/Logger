@@ -80,10 +80,7 @@ class Logger:
         Returns:
             str: The formatted message string with a timestamp.
         """
-        s = str(datetime.now())
-        for e in messages:
-            s += ";" + str(e)
-        s += "\n"
+        s = ";".join(messages)
         return s
 
     def getLogs(

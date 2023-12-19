@@ -7,8 +7,10 @@ app = Flask(__name__)
 app.config.from_object(config)
 log = Logger(app.config["LOG_PATH"])
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def default():
+    data = request.data.decode("utf-8")
+    log.log(data)
     return "Hello World!"
 
 if __name__ == "__main__":
