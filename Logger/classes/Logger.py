@@ -268,7 +268,6 @@ class LoggerClient(Logger):
         buffer_content = "\n".join(buffer)
         url = "http://127.0.0.1:8000/"
         headers = {"Content-Type": "application/json"}
-        print(buffer_content)
         try:
             response = requests.post(url, data=buffer_content, headers=headers)
         except ConnectionError as e:
