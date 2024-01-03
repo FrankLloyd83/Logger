@@ -1,6 +1,6 @@
 from flask import Flask, request
 import Logger.config as config
-from classes.Logger import LoggerServer
+from Logger.classes.Logger import LoggerServer
 
 app = Flask(__name__)
 app.config.from_object(config)
