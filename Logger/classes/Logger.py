@@ -267,8 +267,9 @@ class LoggerClient(Logger):
             time.sleep(5)
         buffer_content = "\n".join(buffer)
         headers = {"Content-Type": "application/json"}
+        url = f"{self.url}/checkConnection"
         try:
-            response = requests.post(self.url, data=buffer_content, headers=headers)
+            response = requests.post(url, data=buffer_content, headers=headers)
         except ConnectionError as e:
             raise e
 
@@ -282,8 +283,9 @@ class LoggerClient(Logger):
             )
         
     def checkConnectionToServer(self) -> None:
+        url = f"{self.url}/checkConnection"
         try:
-            response = requests.get(self.url)
+            response = requests.get(url)
         except ConnectionError as e:
             return False
         if response.status_code == 200:
