@@ -13,6 +13,7 @@ class Logger:
         self.path = path
         self.checkPath()
         self.patternNameFile = r"^log-(\d{8}).txt$"
+        self.url = "https://olaps-logger.azurewebsites.net"
 
     def checkPath(self) -> None:
         """
@@ -213,11 +214,10 @@ class LoggerClient(Logger):
         Raises:
             ConnectionError: If the request fails.
         """
-        url = "http://127.0.0.1:8000/"
         headers = {"Content-Type": "application/json"}
         data = self.formatMessage(messages)
         try:
-            response = requests.post(url, data=data, headers=headers)
+            response = requests.post(self.url, data=data, headers=headers)
         except ConnectionError as e:
             raise e
 
@@ -266,10 +266,9 @@ class LoggerClient(Logger):
         while not self.checkConnectionToServer():
             time.sleep(5)
         buffer_content = "\n".join(buffer)
-        url = "http://127.0.0.1:8000/"
         headers = {"Content-Type": "application/json"}
         try:
-            response = requests.post(url, data=buffer_content, headers=headers)
+            response = requests.post(self.url, data=buffer_content, headers=headers)
         except ConnectionError as e:
             raise e
 
@@ -282,11 +281,9 @@ class LoggerClient(Logger):
                 f"Could not empty buffer. Status code: {response.status_code}"
             )
         
-
     def checkConnectionToServer(self) -> None:
-        url = "http://localhost:8000/checkConnection"
         try:
-            response = requests.get(url)
+            response = requests.get(self.url)
         except ConnectionError as e:
             return False
         if response.status_code == 200:
