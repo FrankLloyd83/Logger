@@ -2,10 +2,14 @@ import os
 from datetime import datetime
 import glob
 import re
+import requests
+from requests.exceptions import ConnectionError
+import threading
+import time
 
 
 class Logger:
-    def __init__(self, path):
+    def __init__(self, path: str):
         self.path = path
         self.checkPath()
         self.patternNameFile = r"^log-(\d{8}).txt$"
@@ -21,7 +25,6 @@ class Logger:
         if os.path.splitext(self.path)[1]:
             raise NotADirectoryError(self.path)
 
-        # Vérifier si le dossier existe
         if not os.path.exists(self.path):
             os.makedirs(self.path)
             print(f"Le dossier {self.path} a été créé avec succès.")
@@ -56,31 +59,48 @@ class Logger:
         Returns:
             str: The normalized path of the log file.
         """
-
-        # Obtenez la date actuelle
         date_actuelle = datetime.now()
-
-        # Formatez la date en nombres
         fileLogName = "log-" + self.getDateToString(date_actuelle) + ".txt"
-
         path = os.path.join(self.path, fileLogName)
-
-        # Normalize the path
         normalized_path = os.path.normpath(path)
 
         return normalized_path
 
-    def formatMessage(self, messages) -> str:
+    def selectLogFileFromMessageDate(self, message: str) -> str or None:
+        """
+        Selects the log file based on the timestamp of the log.
+
+        Returns:
+            str: The normalized path of the log file.
+        """
+        timestamp = message.split(";")[0]
+        date_stamp = timestamp.split(" ")[0]
+        try:
+            date_object = datetime.strptime(date_stamp, "%Y-%m-%d")
+            date_message = date_object.strftime("%Y%m%d")
+            fileLogName = f"log-{date_message}.txt"
+            path = os.path.join(self.path, fileLogName)
+            normalized_path = os.path.normpath(path)
+        except ValueError:
+            return None
+
+        return normalized_path
+
+    def formatMessage(self, messages: tuple) -> str:
         """
         Formats the given messages into a single string with a timestamp.
 
         Args:
-            messages (list): A list of messages to be formatted.
+            messages (tuple): A tuple of messages to be formatted.
 
         Returns:
-            str: The formatted message string with a timestamp.
+            str: The formatted message string beginning with a timestamp.
         """
-        s = ";".join(messages)
+        s = str(datetime.now())
+        for e in messages:
+            s += ";" + str(e)
+        s.replace("\n", "\\n")
+        s += "\n"
         return s
 
     def getLogs(
@@ -134,7 +154,7 @@ class Logger:
 
         return logs
 
-    def check_file_name(self, file_name, start_date, end_date) -> bool:
+    def check_file_name(self, file_name: str, start_date: str, end_date: str) -> bool:
         """
         Checks if the given file name matches the expected pattern and falls within the specified date range.
 
@@ -153,23 +173,127 @@ class Logger:
                 return True
         return False
 
-    def log(self, *messages) -> None:
+
+class LoggerServer(Logger):
+    def log(self, messages: str) -> None:
         """
         Writes the log messages to the log file.
 
         Parameters:
-        * messages: Variable number of messages to be logged.
+        messages: str - The log messages to be written to the log file.
 
         Returns:
         None
         """
+        for message in messages.split("\n"):
+            if message != "":
+                logFile = self.selectLogFileFromMessageDate(message)
+                try:
+                    with open(logFile, "a+") as file:
+                        file.write(message + "\n")
+                except FileNotFoundError:
+                    with open(logFile, "w") as file:
+                        file.write(message + "\n")
+
+
+class LoggerClient(Logger):
+    def __init__(self, path: str):
+        super().__init__(path)
+
+    def logToServer(self, messages: tuple) -> requests.Response or None:
+        """
+        Sends log messages to a central server.
+
+        Args:
+            messages (tuple): tuple of log messages to be sent.
+
+        Returns:
+            requests.Response or None: The response object if the request is successful, None otherwise.
+
+        Raises:
+            ConnectionError: If the request fails.
+        """
+        url = "http://127.0.0.1:8000/"
+        headers = {"Content-Type": "application/json"}
+        data = self.formatMessage(messages)
+        try:
+            response = requests.post(url, data=data, headers=headers)
+        except ConnectionError as e:
+            raise e
+
+        if response.status_code == 200:
+            return response
+        else:
+            return None
+
+    def logToClient(self, messages: tuple) -> None:
+        """
+        Logs the given messages to a local file.
+
+        Args:
+            messages (tuple): tuple of messages to be logged locally.
+
+        Returns:
+            None
+        """
+
         logFile = self.selectLogFileFromCurrDate()
         try:
-            # Ouvrez le fichier en mode d'ajout/lecture
             with open(logFile, "a+") as file:
-                # Effectuez les opérations d'écriture ici
                 file.write(self.formatMessage(messages))
         except FileNotFoundError:
-            # Si le fichier n'existe pas, créez-le et réessayez
             with open(logFile, "w") as file:
                 file.write(self.formatMessage(messages))
+
+    def log(self, *messages: str) -> None:
+        connection_successful = self.checkConnectionToServer()
+        if not connection_successful:
+            self.logToClient(messages)
+            self.createThread()
+        else:
+            self.logToServer(messages)
+
+    def emptyBuffer(self, buffer: list) -> None:
+        """
+        Empties the buffer into the log file.
+
+        Args:
+            buffer (list): The buffer to be emptied.
+
+        Returns:
+            None
+        """
+        while not self.checkConnectionToServer():
+            time.sleep(5)
+        buffer_content = "\n".join(buffer)
+        url = "http://127.0.0.1:8000/"
+        headers = {"Content-Type": "application/json"}
+        print(buffer_content)
+        try:
+            response = requests.post(url, data=buffer_content, headers=headers)
+        except ConnectionError as e:
+            raise e
+
+        if response.status_code == 200:
+            files = glob.glob(f"{self.path}/*")
+            for f in files:
+                os.remove(f)
+        else:
+            raise Exception(
+                f"Could not empty buffer. Status code: {response.status_code}"
+            )
+        
+
+    def checkConnectionToServer(self) -> None:
+        url = "http://localhost:8000/checkConnection"
+        try:
+            response = requests.get(url)
+        except ConnectionError as e:
+            return False
+        if response.status_code == 200:
+            return True
+
+    def createThread(self):
+        thread = threading.Thread(target=self.emptyBuffer, args=(self.getLogs(),))
+        thread.start()
+
