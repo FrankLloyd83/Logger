@@ -1,5 +1,5 @@
 from flask import Flask, request
-import Logger.config as config
+import config
 from Logger.classes.Logger import LoggerServer
 
 app = Flask(__name__)
