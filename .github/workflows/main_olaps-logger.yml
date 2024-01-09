@@ -70,5 +70,5 @@ jobs:
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_00DD5660CD854EE7899A634905E91800 }}
           TENANT_ID: ${{ env.TENANT_ID }}
           CLIENT_ID: ${{ env.CLIENT_ID }}
-          SCOPE: ${{ env.SCOPE }}
+          LOG_SCOPE: ${{ env.LOG_SCOPE }}
           LOG_PATH: ${{ env.LOG_PATH }}
