@@ -10,9 +10,16 @@ on:
       - main
   workflow_dispatch:
 
+env:
+  CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+  TENANT_ID: ${{ variables.TENANT_ID }}
+  CLIENT_ID: ${{ variables.CLIENT_ID }}
+  SCOPE: ${{ variables.SCOPE }}
+  LOG_PATH: ${{ variables.LOG_PATH }}
+
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest      
 
     steps:
       - uses: actions/checkout@v4
