@@ -12,10 +12,6 @@ on:
 
 env:
   CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
-  TENANT_ID: ${{ TENANT_ID }}
-  CLIENT_ID: ${{ CLIENT_ID }}
-  SCOPE: ${{ SCOPE }}
-  LOG_PATH: ${{ LOG_PATH }}
 
 jobs:
   build:
@@ -72,3 +68,7 @@ jobs:
           app-name: 'olaps-logger'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_00DD5660CD854EE7899A634905E91800 }}
+          TENANT_ID: ${{ env.TENANT_ID }}
+          CLIENT_ID: ${{ env.CLIENT_ID }}
+          SCOPE: ${{ env.SCOPE }}
+          LOG_PATH: ${{ env.LOG_PATH }}
