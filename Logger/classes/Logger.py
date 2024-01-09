@@ -16,7 +16,7 @@ class Logger:
         self.tenant_id = config["TENANT_ID"]
         self.client_id = config["CLIENT_ID"]
         self.client_secret = config["CLIENT_SECRET"]
-        self.scope = config["SCOPE"]
+        self.scope = config["LOG_SCOPE"]
         self.checkPath()
         self.patternNameFile = r"^log-(\d{8}).txt$"
         self.url = "https://olaps-logger.azurewebsites.net"
