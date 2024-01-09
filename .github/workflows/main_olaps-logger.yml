@@ -12,10 +12,10 @@ on:
 
 env:
   CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
-  TENANT_ID: ${{ variables.TENANT_ID }}
-  CLIENT_ID: ${{ variables.CLIENT_ID }}
-  SCOPE: ${{ variables.SCOPE }}
-  LOG_PATH: ${{ variables.LOG_PATH }}
+  TENANT_ID: ${{ env.TENANT_ID }}
+  CLIENT_ID: ${{ env.CLIENT_ID }}
+  SCOPE: ${{ env.SCOPE }}
+  LOG_PATH: ${{ env.LOG_PATH }}
 
 jobs:
   build:
