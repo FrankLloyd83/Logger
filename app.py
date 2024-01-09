@@ -18,6 +18,7 @@ def send():
                                log.client_id):
         data = request.data.decode("utf-8")
         log.log(data)
+        return "Log sent!"
 
 @app.route("/getLogs", methods=["GET"])
 def getLogs():

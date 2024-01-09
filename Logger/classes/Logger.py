@@ -288,7 +288,7 @@ class LoggerClient(Logger):
         """
         try:
             logger_token = requests.post(
-                "https://login.microsoftonline.com/3200bc23-08a5-4747-b66c-167d2263eb17/oauth2/v2.0/token",
+                f"https://login.microsoftonline.com/{self.tenant_id}/oauth2/v2.0/token",
                 data={
                     "grant_type": "urn:ietf:params:oauth:grant-type:jwt-bearer",
                     "client_id": self.client_id,
@@ -370,7 +370,7 @@ class LoggerClient(Logger):
         while not self.checkConnectionToServer():
             time.sleep(5)
         buffer_content = "\n".join(buffer)
-        headers = {"Content-Type": "application/json"}
+        headers = {"Content-Type": "application/json", "Authorization": f"Bearer {self.token}"}
         url = f"{self.url}/Send"
         try:
             response = requests.post(url, data=buffer_content, headers=headers)
