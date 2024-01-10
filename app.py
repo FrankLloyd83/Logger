@@ -9,7 +9,7 @@ log = LoggerServer(app.config)
 
 @app.route("/")
 def index():
-    return "Hello World!"
+    return "Hello World! This is the logger default route."
 
 @app.route("/Send", methods=["POST"])
 def send():
