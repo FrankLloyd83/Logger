@@ -395,11 +395,14 @@ class LoggerClient(Logger):
             )
 
     def checkConnectionToServer(self) -> None:
+        print(self.token)
         url = f"{self.url}/checkConnection"
         headers = {"Authorization": f"Bearer {self.token}"}
         try:
             response = requests.get(url, headers=headers, timeout=30)
         except ConnectionError as e:
+            print("checkConnectionToServer(): Failed to connect to server", e)
+            print("checkConnectionToServer(): Response status code:", response.status_code)
             return False
         if response.status_code == 200:
             return True
