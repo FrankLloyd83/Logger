@@ -410,6 +410,7 @@ class LoggerClient(Logger):
         # except Exception as e:
         #     print("checkConnectionToServer(): Failed to connect to server", e)
         #     return False
+        print("Response:", response)
         if response.status_code == 200:
             return True
 
