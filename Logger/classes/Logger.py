@@ -19,7 +19,8 @@ class Logger:
         self.scope = config["LOG_SCOPE"]
         self.checkPath()
         self.patternNameFile = r"^log-(\d{8}).txt$"
-        self.url = "https://olaps-logger.azurewebsites.net"
+        #self.url = "https://olaps-logger.azurewebsites.net"
+        self.url = "http://localhost:8000"
     
     def get_public_key(self, issuer: str, kid: str) -> jwt.algorithms.RSAAlgorithm:
         """
@@ -398,6 +399,7 @@ class LoggerClient(Logger):
     def checkConnectionToServer(self) -> None:
         print(self.token)
         url = f"{self.url}/checkConnection"
+        print(url)
         headers = {"Authorization": f"Bearer {self.token}"}
         try:
             response = requests.get(url, headers=headers, timeout=30)
