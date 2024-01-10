@@ -401,15 +401,15 @@ class LoggerClient(Logger):
         url = f"{self.url}/checkConnection"
         print(url)
         headers = {"Authorization": f"Bearer {self.token}"}
-        try:
-            response = requests.get(url, headers=headers, timeout=30)
-        except ConnectionError as e:
-            print("checkConnectionToServer(): Failed to connect to server", e)
-            print("checkConnectionToServer(): Response status code:", response.status_code)
-            return False
-        except Exception as e:
-            print("checkConnectionToServer(): Failed to connect to server", e)
-            return False
+        #try:
+        response = requests.get(url, headers=headers, timeout=30)
+        # except ConnectionError as e:
+        #     print("checkConnectionToServer(): Failed to connect to server", e)
+        #     print("checkConnectionToServer(): Response status code:", response.status_code)
+        #     return False
+        # except Exception as e:
+        #     print("checkConnectionToServer(): Failed to connect to server", e)
+        #     return False
         if response.status_code == 200:
             return True
 
