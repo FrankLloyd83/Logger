@@ -87,6 +87,7 @@ class Logger:
         except Exception as e:
             print(e)
             return False
+        print("validateAccessToken(): Token validated successfully.")
         return True
 
     def checkPath(self) -> None:
@@ -403,6 +404,9 @@ class LoggerClient(Logger):
         except ConnectionError as e:
             print("checkConnectionToServer(): Failed to connect to server", e)
             print("checkConnectionToServer(): Response status code:", response.status_code)
+            return False
+        except Exception as e:
+            print("checkConnectionToServer(): Failed to connect to server", e)
             return False
         if response.status_code == 200:
             return True
