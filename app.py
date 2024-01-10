@@ -26,14 +26,11 @@ def getLogs():
 
 @app.route("/checkConnection", methods=["GET"])
 def checkConnection():
-    print("Route checkConnection triggered")
     if log.validateAccessToken(request.headers.get("Authorization").split(" ")[1], 
                                "https://login.microsoftonline.com/3200bc23-08a5-4747-b66c-167d2263eb17",
                                log.client_id):
-        print("Connection successful!")
         return "Connection successful!"
     else:
-        print("Connection failed!")
         return "Connection failed!"
 
 if __name__ == "__main__":

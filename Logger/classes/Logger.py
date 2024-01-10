@@ -74,21 +74,25 @@ class Logger:
                 options=options,
             )
         except jwt.ExpiredSignatureError as e:
-            print(e)
+            error = self.formatMessage((e,))
+            self.log((error,))
             return False
         except jwt.InvalidIssuerError as e:
-            print(e)
+            error = self.formatMessage((e,))
+            self.log((error,))
             return False
         except jwt.InvalidAudienceError as e:
-            print(e)
+            error = self.formatMessage((e,))
+            self.log((error,))
             return False
         except jwt.InvalidTokenError as e:
-            print(e)
+            error = self.formatMessage((e,))
+            self.log((error,))
             return False
         except Exception as e:
-            print(e)
+            error = self.formatMessage((e,))
+            self.log((error,))
             return False
-        print("validateAccessToken(): Token validated successfully.")
         return True
 
     def checkPath(self) -> None:
@@ -302,9 +306,9 @@ class LoggerClient(Logger):
                 timeout=30,
             ).json()
             self.token = logger_token["access_token"]
-            print("get_logger_token(): Token retrieved successfully.")
         except Exception as e:
-            print(e)
+            error = self.formatMessage((e,))
+            self.logToClient((error,))
             self.token = None
 
     def logToServer(self, messages: tuple) -> requests.Response or None:
@@ -316,26 +320,18 @@ class LoggerClient(Logger):
 
         Returns:
             requests.Response or None: The response object if the request is successful, None otherwise.
-
-        Raises:
-            ConnectionError: If the request fails.
         """
-        print("logToServer(): Sending log to server.")
         url = f"{self.url}/Send"
         headers = {"Content-Type": "application/json", "Authorization": f"Bearer {self.token}"}
         data = self.formatMessage(messages)
         try:
             response = requests.post(url, data=data, headers=headers)
-        except ConnectionError as e:
-            print("logToServer(): Failed to connect to server", e)
-            raise e
-
-        if response.status_code == 200:
-            print("logToServer(): Log sent successfully. Response status code: ", response.status_code)
-            return response
-        else:
-            print("logToServer(): Failed to send log to server. Response status code:", response.status_code)
+        except Exception as e:
+            error = self.formatMessage((e,))
+            self.logToClient((error,))
             return None
+        return response
+
 
     def logToClient(self, messages: tuple) -> None:
         """
@@ -357,14 +353,11 @@ class LoggerClient(Logger):
                 file.write(self.formatMessage(messages))
 
     def log(self, *messages: str) -> None:
-        print("log(): Is connection to server successful?")
         connection_successful = self.checkConnectionToServer()
         if not connection_successful:
-            print("log(): No.")
             self.logToClient(messages)
             self.createThread()
         else:
-            print("log(): Yes.")
             self.logToServer(messages)
 
     def emptyBuffer(self, buffer: list) -> None:
@@ -397,20 +390,18 @@ class LoggerClient(Logger):
             )
 
     def checkConnectionToServer(self) -> None:
-        print(self.token)
         url = f"{self.url}/checkConnection"
-        print(url)
         headers = {"Authorization": f"Bearer {self.token}"}
-        #try:
-        response = requests.get(url, headers=headers, timeout=30)
-        # except ConnectionError as e:
-        #     print("checkConnectionToServer(): Failed to connect to server", e)
-        #     print("checkConnectionToServer(): Response status code:", response.status_code)
-        #     return False
-        # except Exception as e:
-        #     print("checkConnectionToServer(): Failed to connect to server", e)
-        #     return False
-        print("Response:", response)
+        try:
+            response = requests.get(url, headers=headers, timeout=30)
+        except ConnectionError as e:
+            error = self.formatMessage((e,))
+            self.logToClient((error,))
+            return False
+        except Exception as e:
+            error = self.formatMessage((e,))
+            self.logToClient((error,))
+            return False
         if response.status_code == 200:
             return True
 
