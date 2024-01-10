@@ -300,6 +300,7 @@ class LoggerClient(Logger):
                 timeout=30,
             ).json()
             self.token = logger_token["access_token"]
+            print("get_logger_token(): Token retrieved successfully.")
         except Exception as e:
             print(e)
             self.token = None
@@ -317,17 +318,21 @@ class LoggerClient(Logger):
         Raises:
             ConnectionError: If the request fails.
         """
+        print("logToServer(): Sending log to server.")
         url = f"{self.url}/Send"
         headers = {"Content-Type": "application/json", "Authorization": f"Bearer {self.token}"}
         data = self.formatMessage(messages)
         try:
             response = requests.post(url, data=data, headers=headers)
         except ConnectionError as e:
+            print("logToServer(): Failed to connect to server", e)
             raise e
 
         if response.status_code == 200:
+            print("logToServer(): Log sent successfully. Response status code: ", response.status_code)
             return response
         else:
+            print("logToServer(): Failed to send log to server. Response status code:", response.status_code)
             return None
 
     def logToClient(self, messages: tuple) -> None:
@@ -350,11 +355,14 @@ class LoggerClient(Logger):
                 file.write(self.formatMessage(messages))
 
     def log(self, *messages: str) -> None:
+        print("log(): Is connection to server successful?")
         connection_successful = self.checkConnectionToServer()
         if not connection_successful:
+            print("log(): No.")
             self.logToClient(messages)
             self.createThread()
         else:
+            print("log(): Yes.")
             self.logToServer(messages)
 
     def emptyBuffer(self, buffer: list) -> None:
