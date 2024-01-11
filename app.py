@@ -13,8 +13,8 @@ def index():
 
 @app.route("/Send", methods=["POST"])
 def send():
-    if log.validateAccessToken(request.headers.get("Authorization").split(" ")[1], 
-                               "https://login.microsoftonline.com/3200bc23-08a5-4747-b66c-167d2263eb17",
+    if log.validateAccessToken(request.headers.get("Authorization").split(" ")[1],
+                               app.config["URL_ISSUER_BASE"] + app.config["TENANT_ID"],
                                log.client_id):
         data = request.data.decode("utf-8")
         log.log(data)
@@ -27,7 +27,7 @@ def getLogs():
 @app.route("/checkConnection", methods=["GET"])
 def checkConnection():
     if log.validateAccessToken(request.headers.get("Authorization").split(" ")[1], 
-                               "https://login.microsoftonline.com/3200bc23-08a5-4747-b66c-167d2263eb17",
+                               app.config["URL_ISSUER_BASE"] + app.config["TENANT_ID"],
                                log.client_id):
         return "Connection successful!"
     else:
