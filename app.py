@@ -1,3 +1,4 @@
+#empty
 from flask import Flask, request
 import config
 from Logger.classes.Logger import LoggerServer
