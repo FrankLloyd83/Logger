@@ -282,7 +282,7 @@ class LoggerClient(Logger):
     def __init__(self, config: dict):
         super().__init__(config)
 
-    def get_logger_token(self, token: str) -> str:
+    def get_logger_token_obo(self, token: str) -> str:
         """
         Retrieves the logger token from the authentication server.
 
@@ -308,6 +308,31 @@ class LoggerClient(Logger):
             self.token = logger_token["access_token"]
         except Exception as e:
             error = self.formatMessage((e,))
+            self.logToClient((error,))
+            self.token = None
+
+    def get_logger_token(self) -> str:
+        """
+        Retrieves the logger token from the authentication server.
+
+        Returns:
+            str: The logger token.
+        """
+        try:
+            logger_token = requests.post(
+                f"https://login.microsoftonline.com/{self.tenant_id}/oauth2/v2.0/token",
+                data={
+                    "grant_type": "client_credentials",
+                    "client_id": self.client_id,
+                    "client_secret": self.client_secret,
+                    "scope": self.scope,
+                },
+                timeout=30,
+            ).json()
+            self.token = logger_token["access_token"]
+        except Exception as e:
+            error = self.formatMessage((e,))
+            print(error)
             self.logToClient((error,))
             self.token = None
 
